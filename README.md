@@ -1,72 +1,149 @@
-## Instalación Laravel 11
+## Day 3: Create a Layout file using Laravel Components
 
-<p>Hay diferentes opciones que puedes utilizar para la instalación de Laravel 11</p>
-<article>Entre ellas podemos mencionar:
-+ Xampp
-+ Wampp
-+ Lampp
-+ Laragon
-+ Composer
-+ Node.js
-+ En este tutorial utilizaremos <a href="https://herd.laravel.com/windows">Laravel Herd </a>
-</article>
+Aquí es donde nos quedamos al final del día 2:
 
-## Creando tu primer Route y View
-
-Lo primero que vamos a ver es las rutas! ¿Cómo funciona esta pieza de información que encontramos bajo el folder routes/web.php?
-
-    Route::get('/', function () {
-    return view('welcome');
+    Route::get('/contact', function () {
+    return view('contact');
     });
 
-Route, get, '/' [eso es tipicamente el homepage]...cuando 'obtienes' o 'visitas' el homepage, entonces 'corre', 'ejecuta esta función. Y parece que esta función retorna una vista llamada "welcome".
+Creamos en nuestra tarea una ruta para la página 'Contact'
 
-Así que básicamente estamos declarando una Ruta que esta escuchando un pedido GET, lo cual es visitar un URL en el navegador; en este caso, escuchar una petición a la 'homepage'. Si una persona esta escuchando un petición a la pógina 'about' lo escribiríamos así:
+Aún estamos utilizando la página 'welcome' que viene por defecto. ¿qué tal si cambiamos su nombre a 'home'? Ok, entonces si cambio ese nombre tendré que actualizar el nombre de la vista:
 
-    Route::get('/about', function () {
-    return view('about');
-    });
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Home Page</title>
+    </head>
+    <body>
+        <h1>Hello from the Home Page.</h1>
+    </body>
+    </html>
 
-Entonces, si el usuario visita esa página desencadena la función, y la función retorna una vista llamada 'welcome'.
+Creamos la vista de 'contact tambien utilizando la misma plantilla, y luego probamos en el navegador si funciona.
 
-Luego, nuestro siguiente pensamiento es: ¿Dónde esta la vista 'welcome'?
+Obviamente no deseamos estar cambiando de URL cada vez que tengamos que cambiar de página, así que agregaremos nuestra simple área de navegación:
 
-Para ello, debemos ir a la carpeta 'resources' y abrir otra carpeta que esta adentro llamada 'views' y ¡voilá!Encontraremos un archivo llamado 'welcome.blade.php'.
+    <nav>
+        <a href="/">Home</a>
+        <a href="/about">About</a>
+        <a href="/contact">Contact</a>
+    </nav>
 
-Blade es un motor de plantillas de Laravel. Es una capa encima de php que ofrece algunas comodidades que encontraras muy útiles. 
+la cual colocaremos arriba de nuestro 'Hello from..."
 
-Al revisar 'welcome.blade.php' veremos que contiene el 'markup' para el 'homepage'. Hagámos lo siguiente, borremos todo lo que está en medio de la etiqueta 'body' y escribamos un título 'h1' que diga "Hello, World!
+No se verá lindo pero si vamos a la 'home' page veremos el menú. Ahora, por lo menos desde 'home', podremos accesar la página 'about' o la de 'contact.
 
-Refresquemos nuestra página y funciona! Muy bien, acabamos de aprender entonces que puedes visitar un archivo 'route' y puedes declarar una ruta, y esa 'ruta' puede retornar a lo que llamamos una 'vista'. Mantenlo simple.
+Ahora bien, desde el momento que cargamos esas páginas perderemos esa área de navegación.
 
-Ahora, Declaremos una nueva ruta. hay un par de formas de hacerlo:
+Si somos principitantes esto lo resolveremos fácilmente copiando y pegando el área de navegación en cada vista. Y funcionará, pero no es 'escalable', no es la mejor idea.
 
-una: retornemos una simple cadena,
+Es en este caso que utilizaremos una plantilla o 'layout'. Primero volvamos a cambiar los nombres de nuestras vistas agregando la palabra 'blade' a su nombre: home.blade.php.
 
-    Route::get('/about', function () {
-    return 'about page';
-    });
+Recuerda, Blade es el motor de plantillas de Laravel. Es una pequeña capa sobre PHP que una vez cargada por el navegador es compilado por este.
 
-Así que volvamos a nuestro navegador y escribamos 'example.test/about'...Allí lo tienes: funciona!
+Es una pequeña capa que te brinda algunos "goodies" tales como 'Helpers', 'shortcuts', 'directives' de las cuales aprenderemos pronto; así como 'layouts' o archivos maestros. 
 
-También podemos retornar un arreglo [array]
+## Componentes
 
-    Route::get('/about', function () {
-    return ['foo' => 'bar'];
-    }); 
+Vamos a crear una nueva carpeta llamada "Components" bajo 'views'. Este nombre de directorio es importante a propósito. 
 
-Y nuestro navegador lo convierte en un formato JSON.
+Si no estas familiarizado con este término, piensa que es un bloque reutilizable, que será utilizado en varios lugares de tu aplicación: una tarea, un menú, un 'dropdown', un elemento, un archivo de plantilla [layout], una tarjeta, un mensaje, un avatar, etc.
 
-dos: retornemos una vista...
+Crearemos un archivo llamado 'layout' en este directorio y eso le indicará a Laravel que lo trate como un componente: layout.blade.php. 
 
-    Route::get('/about', function () {
-    return view('about');
-    });
+¡No olvides agregar la palabra 'blade' en el nombre del archivo. Muchas personas lo olvidan.
 
-En este caso, tendremos que ir una vez más a la carpeta 'resources/views' y crear una nueva vista llamada simplemente 'about.php'.
+Vamos a copiar todo este código en el archivo 'layout.blade.php':
 
-Bien, ahora tenemos un nuevo proyecto en Laravel, donde hemos declarado dos rutas. Una de ellas es el 'homepage', y la otra carga la página 'About'.
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>About Page</title>
+    </head>
+    <body>
+        <nav>
+            <a href="/">Home</a>
+            <a href="/about">About</a>
+            <a href="/contact">Contact</a>
+        </nav>
+        <h1>Hello from the Home Page.</h1>
+    </body>
+    </html>
 
-Muy bien! Ahora una tarea: trata de crear una ruta que retorne una vista llamada "Contacts".
+Bien ahora, en nuestro archivo 'home.blade.php' vamos a referenciar el archivo 'layout' que acabamos de editar. Lo haremos como si fuera una etiqueta HTML personalizada:
 
+    <x-layout>
+    
+    </x-layout>
 
+Así le daremos el nombre del archivo a esa etiqueta, anteponiendo 'x-' para asegurarnos que es único y que no interfiera con existentes etiquetas HTML.
+
+Esto es cool! Si vamos a nuestro navegador y refrescamos, veremos cargarse ese archivo 'layout', lo cuál es grandioso.
+
+Ok, ahora bien tenemos un pequeño problema por aquí en relación a la siguiente línea:
+
+    <h1>Hello from the Home Page.</h1>
+
+Esto no debería estar en una archivo 'layout' ya que se vería reflejado en cualquiera de las vistas donde hagamos referencia a nuestro archivo 'layout'.
+
+Para resolver este inconveniente podríamos copiar esta línea de codigo a nuestra página 'home' así:
+
+    <x-layout>
+        <h1>Hello from the Home Page.</h1>
+    </x-layout>
+
+Pero al refrescar nuestro navegador no veríamos 'Hello from the Home Page'; y no es porque lo hayamos hecho inapropiadamente, sino que en el archivo 'layout' tenemos que declarar explicitamente en que ranura esta etiqueta '<h1>' debera aparecer.
+
+Para dicho efecto, podemos utilizar la variable '$slot' que siempre va a estar disponible en Laravel para tí. Podemos utilizar esta 'forma larga':
+
+    <body>
+        <nav>
+            <a href="/">Home</a>
+            <a href="/about">About</a>
+            <a href="/contact">Contact</a>
+        </nav>
+        
+        <?php echo $slot ?>
+    </body>
+
+Al refrescar nuestro navegador, ahora sí veremos 'Hello from the Home page' debajo de nuestro pequeño menú.
+
+Ahora, hemos creado nuestro primer componente para nuestro archivo Layout, o como le llaman algunas nuestro 'master file'. El archivo 'layout' es casi como la 'estructura' de tu aplicación. Es todas las marcas circundantes incluidas en él como el head, el nav, los scripts que deben ser importados, es la estructura general, y después tipicamente tienes una seccion principal que siempre sera unica para cada página.
+
+Así que diseñaremos toda la estructura y después insertaremos las marcas especificas de la pagina en la ranura (slot).
+
+Ahora podremos reutilizar este 'layout' en todas nuestra otras páginas, reemplanzando la palabra home por la de cada una de ellas.
+
+    <x-layout>
+        <h1>Hello from the About Page.</h1>
+    </x-layout>
+
+    <x-layout>
+        <h1>Hello from the Contact Page.</h1>
+    </x-layout>
+
+## Your first Blade Helper
+
+Podemos utilizar la siguiente sintaxis en nuestro layout:
+
+    <?php echo $slot ?>
+
+Pero, ya que estamos utilizando Blade podemos utilizar el siguiente helper:
+
+    {{ $slot }}
+
+Al reemplazarlo en nuestro archivo 'layout' y refrescar nuestro navegador functionar, simple y sencillamente porque {{ }} es igual a <?php echo  ?>.
+
+## Resumen
+
++ Para el día 3 hemos aprendido a crear nuestro primer simple layout de tres páginas. Es básico, pero deberías estar orgulloso de haber aprendido algo nuevo el dia de hoy.
++ También tuviste tu primer introducción a componentes en tu archivo layout, lo cual es super poderoso y muy prominente en la comunidad Laravel.
+
+## Homework
+
+Create a <nav-link> Laravel component.
