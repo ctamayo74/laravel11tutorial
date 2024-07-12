@@ -1,30 +1,6 @@
-## Day 3: Create a Layout file using Laravel Components
+s## Day 4 : Make a pretty layout using Tailwind CSS
 
-Aquí es donde nos quedamos al final del día 2:
-
-    Route::get('/contact', function () {
-    return view('contact');
-    });
-
-Creamos en nuestra tarea una ruta para la página 'Contact'
-
-Aún estamos utilizando la página 'welcome' que viene por defecto. ¿qué tal si cambiamos su nombre a 'home'? Ok, entonces si cambio ese nombre tendré que actualizar el nombre de la vista:
-
-    <!DOCTYPE html>
-    <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Home Page</title>
-    </head>
-    <body>
-        <h1>Hello from the Home Page.</h1>
-    </body>
-    </html>
-
-Creamos la vista de 'contact tambien utilizando la misma plantilla, y luego probamos en el navegador si funciona.
-
-Obviamente no deseamos estar cambiando de URL cada vez que tengamos que cambiar de página, así que agregaremos nuestra simple área de navegación:
+Para empezar vamos a completar la tarea del día 3. Recuerda que te pedimos extraer uno de estos enlaces de navegación a su propio componente dedicado:
 
     <nav>
         <a href="/">Home</a>
@@ -32,118 +8,111 @@ Obviamente no deseamos estar cambiando de URL cada vez que tengamos que cambiar 
         <a href="/contact">Contact</a>
     </nav>
 
-la cual colocaremos arriba de nuestro 'Hello from..."
+Hagamos eso juntos. En nuestro directorio 'Components', creamos el archivo 'nav-link.blade.php. Tomemos esta línea de código y lo pegamos en nuestro nuevo archivo:
 
-No se verá lindo pero si vamos a la 'home' page veremos el menú. Ahora, por lo menos desde 'home', podremos accesar la página 'about' o la de 'contact.
+    <a href="/">Home</a>
 
-Ahora bien, desde el momento que cargamos esas páginas perderemos esa área de navegación.
+y esa linea la reemplazamos por:
 
-Si somos principitantes esto lo resolveremos fácilmente copiando y pegando el área de navegación en cada vista. Y funcionará, pero no es 'escalable', no es la mejor idea.
+    <x-nav-link></x-nav-link>
 
-Es en este caso que utilizaremos una plantilla o 'layout'. Primero volvamos a cambiar los nombres de nuestras vistas agregando la palabra 'blade' a su nombre: home.blade.php.
+en nuestro archivo 'layout.blade.php'.
 
-Recuerda, Blade es el motor de plantillas de Laravel. Es una pequeña capa sobre PHP que una vez cargada por el navegador es compilado por este.
+Ahora bien, esto funcionará; pero necesitamos que sea más dinámico, para que pueda ser utilizado por cualquier elemento del enlace de navegación.
 
-Es una pequeña capa que te brinda algunos "goodies" tales como 'Helpers', 'shortcuts', 'directives' de las cuales aprenderemos pronto; así como 'layouts' o archivos maestros. 
+Entonces, utilizaremos nuestra técnica del '$slot' aquí:
 
-## Componentes
+    <a href="/"> {{ $slot }}</a>
 
-Vamos a crear una nueva carpeta llamada "Components" bajo 'views'. Este nombre de directorio es importante a propósito. 
+Sin embargo, al refrescar notarás que el cualquiera de los enlaces nos llevan al mismo directorio raíz.
 
-Si no estas familiarizado con este término, piensa que es un bloque reutilizable, que será utilizado en varios lugares de tu aplicación: una tarea, un menú, un 'dropdown', un elemento, un archivo de plantilla [layout], una tarjeta, un mensaje, un avatar, etc.
+    <nav>
+        <x-nav-link>Home</x-nav-link>
+        <x-nav-link>About</x-nav-link>
+        <x-nav-link>Contact</x-nav-link>
+    </nav>
 
-Crearemos un archivo llamado 'layout' en este directorio y eso le indicará a Laravel que lo trate como un componente: layout.blade.php. 
+ Entonces que tendremos que modificar nuestro layout una vez mas. Parece que tendremos que pasar un "href=" como normalmente hacemos. 
 
-¡No olvides agregar la palabra 'blade' en el nombre del archivo. Muchas personas lo olvidan.
+    <nav>
+        <x-nav-link href="/">Home</x-nav-link>
+        <x-nav-link href="/about">About</x-nav-link>
+        <x-nav-link href="/contact">Contact</x-nav-link>
+    </nav>
 
-Vamos a copiar todo este código en el archivo 'layout.blade.php':
+Pero entonces en nuestro 'nav-link', cómo lo accesaremos?
 
-    <!DOCTYPE html>
-    <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>About Page</title>
-    </head>
-    <body>
-        <nav>
-            <a href="/">Home</a>
-            <a href="/about">About</a>
-            <a href="/contact">Contact</a>
-        </nav>
+Bueno, todos los componentes blade de Laravel tienen acceso al objeto "atributes", y este objeto contendrá los detalles de todos los atributos que le pases tales como "href", "id", "class", cualquiera de estos.
+
+Así que si volvemos a nuestro componente, podemos 'php echo' dicho objeto:
+
+    <a {{ $attributes }}> {{ $slot }}</a>
+
+y eso encadenará apropiadamente. Pero, recuerda que '$attributes' es un objeto así que hay mas "bombos y platillos" de los que ves inicialmente aquí. Pero mantegamoslo simple por hoy.
+
+Bien, ahora si refrescamos nuestro navegador veremos que los enlaces si nos llevan a la página 'contact' o 'about' o 'home.
+
+Muy bien, solo recuerda que si agregas otros atributos tales como 'style' eso tambien se desplegará:
+
+    <nav>
+        <x-nav-link href="/">Home</x-nav-link>
+        <x-nav-link href="/about" style="color: green">About</x-nav-link>
+        <x-nav-link href="/contact">Contact</x-nav-link>
+    </nav>
+
+Excelente! Estos nos ayudara en el futuro a aislar algunas caracteristicas que podrian complicar un poco el menu de navegacion, así guárdalo en tu bolsa.
+
+## Tailwind CSS
+
+Este no es un pre-requisito de este curso. Pero Tailwind nos ayudará a hacer las cosas un poco mas fáciles en términos de CSS. ¿Qué es Tailwind CSS? Tailwind es una marco de trabajo utilitario de CSS.
+
+Y por utilitario, entendemos que podemos declarar clases que nos refieren a propiedades especificas de CSS efectivamente. Por ejemplo, podría haber una clase llamada 'text-red-500' y eso literalmente se refiere a configurar el color a ese tipo de rojo. 
+
+Podría haber otra nombre de clase 'mr-2'y eso se traduce "a configurar el margen derecho al nivel 2".
+
+Así que es fácil de aprender pero no es un pre-requisito.
+
+Ahora bien, una cosa que realmente me gusta de Tailwind es 'companion Tailwind ui.com'. Esta es una herramienta de paga pero ellos ofrecen componentes de ejemplo gratis y esos serán justamente los que utilizaremos para esta seria.
+
+Si navegamos a https://tailwindui.com/ y hacemos clic en "Browse components", y nos desplazamos a "Application UI", notarás que ellos tienen ejemplos de 'sidebars' y 'multicolumn layouts' y 'headings'; componentes que nos permitirán formar el andamiaje de cualquier aplicación nueva en la que estes trabajando.
+
+Ok, hagamos clic en 'Stacked layouts' y copiemos el primer ejemplo, el cual es gratuito haciendo clic en el botón de 'copiar'. Y en nuestro archivo 'layout.blade.php' en medio de la etiqueta 'body' pegaremos el código que copiamos.
+
+Es una gran pieza de HTML, que no copiare aquí! Iremos a lo que es importante y borraremos mucho de lo que esta ahí y no necesitamos.
+
+Al refrescar el navegador, nos daremos cuenta que hemos incorporado todas esas clases de Tailwind; pero aún no hemos incorporado el framework de Tailwind CSS. Así que, puedes adjuntar esto a la herramienta de construcción que mejor te parezca, si sabes lo que eso es; pero, mientras estemos en la 'fase de juego' lo vamos a referenciar en un CDN:
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+Y voila! Al refrescar el navegador lo verás funcionando. Cool!
+
+Ahora tomaremos un par de minutos para borrar todo lo que no vamos a necesitar: 
+
+    + dropdown menu
+    + mobile styling
+    + en el menu solo necesitamos 3 enlaces (links): "Home, About y Contact" y reemplazaremos los href
+    + php echo $slot
+    + change dynamically the heading 
+
+Ahora bien, esa variable $heading no ha sido declarada por lo tanto recibiremos un mensaje de error, lo cual es un comportamiento esperado. ¿Cómo la declaramos?
+
+La podemos declarar como un 'prop' en nuestro archivo 'home.blade.php'. Un prop es como un atributo personalizado:
+
+    <x-layout heading="">
         <h1>Hello from the Home Page.</h1>
-    </body>
-    </html>
-
-Bien ahora, en nuestro archivo 'home.blade.php' vamos a referenciar el archivo 'layout' que acabamos de editar. Lo haremos como si fuera una etiqueta HTML personalizada:
-
-    <x-layout>
-    
     </x-layout>
 
-Así le daremos el nombre del archivo a esa etiqueta, anteponiendo 'x-' para asegurarnos que es único y que no interfiera con existentes etiquetas HTML.
-
-Esto es cool! Si vamos a nuestro navegador y refrescamos, veremos cargarse ese archivo 'layout', lo cuál es grandioso.
-
-Ok, ahora bien tenemos un pequeño problema por aquí en relación a la siguiente línea:
-
-    <h1>Hello from the Home Page.</h1>
-
-Esto no debería estar en una archivo 'layout' ya que se vería reflejado en cualquiera de las vistas donde hagamos referencia a nuestro archivo 'layout'.
-
-Para resolver este inconveniente podríamos copiar esta línea de codigo a nuestra página 'home' así:
+o, podemos declarar un slot nombrado. Recuerda que los slots son áreas donde pegamos contenido; así que podemos tener slots en diferentes áreas de nuestra página. Por eso, necesitamos nombrarlos, para poder distinguirlos: Dashboard slot, main slot, footer slot, etc.
 
     <x-layout>
+        <x-slot:heading>
+            Home Page
+        </x-slot:heading>
         <h1>Hello from the Home Page.</h1>
     </x-layout>
 
-Pero al refrescar nuestro navegador no veríamos 'Hello from the Home Page'; y no es porque lo hayamos hecho inapropiadamente, sino que en el archivo 'layout' tenemos que declarar explicitamente en que ranura esta etiqueta '<h1>' debera aparecer.
-
-Para dicho efecto, podemos utilizar la variable '$slot' que siempre va a estar disponible en Laravel para tí. Podemos utilizar esta 'forma larga':
-
-    <body>
-        <nav>
-            <a href="/">Home</a>
-            <a href="/about">About</a>
-            <a href="/contact">Contact</a>
-        </nav>
-        
-        <?php echo $slot ?>
-    </body>
-
-Al refrescar nuestro navegador, ahora sí veremos 'Hello from the Home page' debajo de nuestro pequeño menú.
-
-Ahora, hemos creado nuestro primer componente para nuestro archivo Layout, o como le llaman algunas nuestro 'master file'. El archivo 'layout' es casi como la 'estructura' de tu aplicación. Es todas las marcas circundantes incluidas en él como el head, el nav, los scripts que deben ser importados, es la estructura general, y después tipicamente tienes una seccion principal que siempre sera unica para cada página.
-
-Así que diseñaremos toda la estructura y después insertaremos las marcas especificas de la pagina en la ranura (slot).
-
-Ahora podremos reutilizar este 'layout' en todas nuestra otras páginas, reemplanzando la palabra home por la de cada una de ellas.
-
-    <x-layout>
-        <h1>Hello from the About Page.</h1>
-    </x-layout>
-
-    <x-layout>
-        <h1>Hello from the Contact Page.</h1>
-    </x-layout>
-
-## Your first Blade Helper
-
-Podemos utilizar la siguiente sintaxis en nuestro layout:
-
-    <?php echo $slot ?>
-
-Pero, ya que estamos utilizando Blade podemos utilizar el siguiente helper:
-
-    {{ $slot }}
-
-Al reemplazarlo en nuestro archivo 'layout' y refrescar nuestro navegador functionar, simple y sencillamente porque {{ }} es igual a <?php echo  ?>.
-
-## Resumen
-
-+ Para el día 3 hemos aprendido a crear nuestro primer simple layout de tres páginas. Es básico, pero deberías estar orgulloso de haber aprendido algo nuevo el dia de hoy.
-+ También tuviste tu primer introducción a componentes en tu archivo layout, lo cual es super poderoso y muy prominente en la comunidad Laravel.
+Y replicamos ese slot named en About and Contact page. Ahora bien podriamos modificar las imágenes del usuario y de la empresa, para lo cual buscariamos las etiquetas de imágenes para editarlas.
 
 ## Homework
 
-Create a <nav-link> Laravel component.
+Ahora bien, habrás notado que cada vez que haces clic ya sea en 'About' o 'Contact' menu, 'Home' se queda seleccionado. Tendremos que encontrar la manera condicional de crear layouts o aplicar Styling basado en cuál es la URL actual, o cuál es la ruta actual. Aprenderemos a hacer eso en el día 5. Así que no tendremos tarea el día de hoy. Nos vemos luego! Bye!
