@@ -1,118 +1,144 @@
-s## Day 4 : Make a pretty layout using Tailwind CSS
+## Day 5 : Dandole estilo al enlace de navegación actualmente activo
 
-Para empezar vamos a completar la tarea del día 3. Recuerda que te pedimos extraer uno de estos enlaces de navegación a su propio componente dedicado:
+Hoy nos enfocaremos en estos enlaces de navegación! Necesitamos descubrir como aplicar estilos personalizados basados en cual es la ruta o url seleccionada.
 
-    <nav>
-        <a href="/">Home</a>
-        <a href="/about">About</a>
-        <a href="/contact">Contact</a>
-    </nav>
+Visualmente noten como el estilo de navegacion activa esta "quemada" en el 'Home' page, aún cuando hagamos clic en otro enlace. Lo vamos a arreglar.
 
-Hagamos eso juntos. En nuestro directorio 'Components', creamos el archivo 'nav-link.blade.php. Tomemos esta línea de código y lo pegamos en nuestro nuevo archivo:
+Empecemos en nuestro archivo 'layout.blade.php'. Noten como Tailwind nos da la sugerencia de que debemos configurar la altura a 100% tanto en "<html>" como en "<body>", Así que lo haremos ahora.
 
-    <a href="/">Home</a>
+    <!--
+    This example requires updating your template:
 
-y esa linea la reemplazamos por:
+    ```
+    <html class="h-full bg-gray-100">
+    <body class="h-full">
+    ```
+    -->
 
-    <x-nav-link></x-nav-link>
+Así que ahora podras ver en tu pagina web, como el fondo es de color gris y cubre el 100% de contenido de la pantalla.
 
-en nuestro archivo 'layout.blade.php'.
+Muy bien ahora iremos adonde estan los enlaces de navegación: 
 
-Ahora bien, esto funcionará; pero necesitamos que sea más dinámico, para que pueda ser utilizado por cualquier elemento del enlace de navegación.
+	<div class="hidden md:block">
+                            <div class="ml-10 flex items-baseline space-x-4">
+                                <!-- Current: "bg-gray-900 text-white", Default: "text-gray-300 hover:bg-gray-700 hover:text-white" -->
+                                <a href="/" class="rounded-md bg-gray-900 px-3 py-2 text-sm font-medium text-white" aria-current="page">Home</a>
+                                <a href="/about" class="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white">About</a>
+                                <a href="/contact" class="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white">Contacts</a>
+                            </div>
+                        </div>
 
-Entonces, utilizaremos nuestra técnica del '$slot' aquí:
+Y noten como el primero tiene el estilo activo "bg-gray-900". En general, en Tailwind, el nivel 100 es la version mas liviana o transparente y el nivel 900 el mas oscuro. Así que si esta activo, lucira con texto en color blanco y fondo oscuro; de lo contrario, lucira con un fondo un poco mas claro y un texto blanco cuando situemos el punto sobre el.
 
-    <a href="/"> {{ $slot }}</a>
+Así que esto es lo que haremos: correremos una condicion que determinara si la página actual esta o no en la pagina principal "Home", y luego removeremos el resto:
 
-Sin embargo, al refrescar notarás que el cualquiera de los enlaces nos llevan al mismo directorio raíz.
+	
+	- <a href="/" class="rounded-md bg-gray-900 px-3 py-2 text-sm font-medium text-white" aria-current="page">Home</a>
+	+ <a href="/" class="{{ false ? 'rounded-md bg-gray-900 px-3 py-2 text-sm font-medium text-white' : 'rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white'}}" aria-current="page">Home</a>
 
-    <nav>
-        <x-nav-link>Home</x-nav-link>
-        <x-nav-link>About</x-nav-link>
-        <x-nav-link>Contact</x-nav-link>
-    </nav>
 
- Entonces que tendremos que modificar nuestro layout una vez mas. Parece que tendremos que pasar un "href=" como normalmente hacemos. 
+Ahora, no va a pasar nada hasta que cambienmos el condicional de 'True' a 'False'.
 
-    <nav>
-        <x-nav-link href="/">Home</x-nav-link>
-        <x-nav-link href="/about">About</x-nav-link>
-        <x-nav-link href="/contact">Contact</x-nav-link>
-    </nav>
+    <a href="/" class="{{ false ? 'rounded-md bg-gray-900 px-3 py-2 text-sm font-medium text-white' : 'rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white'}}" aria-current="page">Home</a>
 
-Pero entonces en nuestro 'nav-link', cómo lo accesaremos?
+Muy bien! Ahora lo que nos falta es sustituir la condición 'false' con un método real de llamada para que cambie. Laravel incluye fuera de la caja una función 'request Helper'. Usted puede llamarla para tomar información acerca del pedido actual.
 
-Bueno, todos los componentes blade de Laravel tienen acceso al objeto "atributes", y este objeto contendrá los detalles de todos los atributos que le pases tales como "href", "id", "class", cualquiera de estos.
+Ahora, uno de los metodos en el objeto se llama 'is' y nos permite pasar una expresion RegEx, un patrón que determinara si la pagina actual es igual al patrón.
 
-Así que si volvemos a nuestro componente, podemos 'php echo' dicho objeto:
+	<a href="/" class="{{ request()->is('/') ? 'rounded-md bg-gray-900 px-3 py-2 text-sm font-medium text-white' : 'rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white'}}" aria-current="page">Home</a>
+                                <a href="/about" class="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white">About</a>
+                                <a href="/contact" class="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white">Contacts</a>
 
-    <a {{ $attributes }}> {{ $slot }}</a>
+y Funciona! Asi que ahora vamos a replicarlo en los demas enlaces:
 
-y eso encadenará apropiadamente. Pero, recuerda que '$attributes' es un objeto así que hay mas "bombos y platillos" de los que ves inicialmente aquí. Pero mantegamoslo simple por hoy.
+	
+	<a href="/" class="{{ request()->is('/') ? 'rounded-md bg-gray-900 px-3 py-2 text-sm font-medium text-white' : 'rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white'}}">Home</a>
+                                <a href="/about" class="{{ request()->is('about') ? 'rounded-md bg-gray-900 px-3 py-2 text-sm font-medium text-white' : 'rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white'}} rounded-md px3 py-2 text-sm font-medium">About</a>
+                                <a href="/contact" class="{{ request()->is('contact') ? 'rounded-md bg-gray-900 px-3 py-2 text-sm font-medium text-white' : 'rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white'}} rounded-md px3 py-2 text-sm font-medium">Contacts</a>
 
-Bien, ahora si refrescamos nuestro navegador veremos que los enlaces si nos llevan a la página 'contact' o 'about' o 'home.
+Parece que a este punto, todo esta funcionando bien. Recuerden que un par de días atrás les dije que los enlaces, en la vida real, se podían poner un poco complicados a medida que vamos modificandolo y poniendo estas condicionales.
 
-Muy bien, solo recuerda que si agregas otros atributos tales como 'style' eso tambien se desplegará:
 
-    <nav>
-        <x-nav-link href="/">Home</x-nav-link>
-        <x-nav-link href="/about" style="color: green">About</x-nav-link>
-        <x-nav-link href="/contact">Contact</x-nav-link>
-    </nav>
+Por que no, entonces, reintroducimos un componente de navegacion y vemos como luce. Vayamos a componentes y creemos un nuevo componente llamado 'nav-link.blade.php'.
 
-Excelente! Estos nos ayudara en el futuro a aislar algunas caracteristicas que podrian complicar un poco el menu de navegacion, así guárdalo en tu bolsa.
+Agregamos esta línea de código:
 
-## Tailwind CSS
+	<a href="/" class="{{ request()->is('/') ? 'rounded-md bg-gray-900 px-3 py-2 text-sm font-medium text-white' : 'rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white'}}">Home</a>
 
-Este no es un pre-requisito de este curso. Pero Tailwind nos ayudará a hacer las cosas un poco mas fáciles en términos de CSS. ¿Qué es Tailwind CSS? Tailwind es una marco de trabajo utilitario de CSS.
+Como discutimos la vez pasada, no queremos que este con elementos 'quemados'
 
-Y por utilitario, entendemos que podemos declarar clases que nos refieren a propiedades especificas de CSS efectivamente. Por ejemplo, podría haber una clase llamada 'text-red-500' y eso literalmente se refiere a configurar el color a ese tipo de rojo. 
+Nuestros enlaces en el 'layout' luciran de esta manera:
 
-Podría haber otra nombre de clase 'mr-2'y eso se traduce "a configurar el margen derecho al nivel 2".
+	<x-nav-link href="/">Home</x-nav-link>
+                                <x-nav-link href="/about">About</x-nav-link>
+                                <x-nav-link href="/contact">Contacts</x-nav-link>
 
-Así que es fácil de aprender pero no es un pre-requisito.
 
-Ahora bien, una cosa que realmente me gusta de Tailwind es 'companion Tailwind ui.com'. Esta es una herramienta de paga pero ellos ofrecen componentes de ejemplo gratis y esos serán justamente los que utilizaremos para esta seria.
+Ahora bien editemos nuestro componente de navegacion y modifiquemos esta parte del 'aria-current'. Si estas contruyento una app en produccion y deseas ser accesible como sea posible esto es para escritores de pantalla y es una forma de indicar si el actual enlace representa la pagina actual en una lista de paginas. Si en lugar de esto lo cambiamos a 'false', eso significa que no es la pagina actual.
 
-Si navegamos a https://tailwindui.com/ y hacemos clic en "Browse components", y nos desplazamos a "Application UI", notarás que ellos tienen ejemplos de 'sidebars' y 'multicolumn layouts' y 'headings'; componentes que nos permitirán formar el andamiaje de cualquier aplicación nueva en la que estes trabajando.
+    - <a class="{{ request()->is('/') ? 'rounded-md bg-gray-900 px-3 py-2 text-sm font-medium text-white' : 'rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white'}}" aria-current="page">Home</a>
+    + <a class="{{ request()->is('/') ? 'rounded-md bg-gray-900 px-3 py-2 text-sm font-medium text-white' : 'rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white'}}" aria-current="false ">Home</a>
 
-Ok, hagamos clic en 'Stacked layouts' y copiemos el primer ejemplo, el cual es gratuito haciendo clic en el botón de 'copiar'. Y en nuestro archivo 'layout.blade.php' en medio de la etiqueta 'body' pegaremos el código que copiamos.
 
-Es una gran pieza de HTML, que no copiare aquí! Iremos a lo que es importante y borraremos mucho de lo que esta ahí y no necesitamos.
 
-Al refrescar el navegador, nos daremos cuenta que hemos incorporado todas esas clases de Tailwind; pero aún no hemos incorporado el framework de Tailwind CSS. Así que, puedes adjuntar esto a la herramienta de construcción que mejor te parezca, si sabes lo que eso es; pero, mientras estemos en la 'fase de juego' lo vamos a referenciar en un CDN:
+Pero, también podemos configurarlo de la siguiente manera: 
 
-    <script src="https://cdn.tailwindcss.com"></script>
+	<a class="{{ request()->is('/') ? 'rounded-md bg-gray-900 px-3 py-2 text-sm font-medium text-white' : 'rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white'}}" aria-current="{{ request()->is('/') ? 'page' : 'false'}}">Home</a>
 
-Y voila! Al refrescar el navegador lo verás funcionando. Cool!
+Ahora vamos a dinamizar lo que va en medio de la etiqueta de ancla '<a>' utilizando nuestra variable '$slot':
 
-Ahora tomaremos un par de minutos para borrar todo lo que no vamos a necesitar: 
+	<a class="{{ request()->is('/') ? 'rounded-md bg-gray-900 px-3 py-2 text-sm font-medium text-white' : 'rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white'}}" aria-current="{{ request()->is('/') ? 'page' : 'false'}}">{{ $slot }}</a>
 
-    + dropdown menu
-    + mobile styling
-    + en el menu solo necesitamos 3 enlaces (links): "Home, About y Contact" y reemplazaremos los href
-    + php echo $slot
-    + change dynamically the heading 
+Muy bien, ahora podemos utilizar un 'prop' que indica si este enlace de navegación debería ser marcado como el enlace activo.
 
-Ahora bien, esa variable $heading no ha sido declarada por lo tanto recibiremos un mensaje de error, lo cual es un comportamiento esperado. ¿Cómo la declaramos?
+En los componentes blade escucharas acerca de los atributos y los 'props', asi que permite aclararte un poco acerca de ello.
 
-La podemos declarar como un 'prop' en nuestro archivo 'home.blade.php'. Un prop es como un atributo personalizado:
+Los 'attributes' representan atributos HTML: tales como href, id, class, etc. 
 
-    <x-layout heading="">
-        <h1>Hello from the Home Page.</h1>
-    </x-layout>
+ 
+Un 'prop' sería cualquier cosa que no sea un atributo. Basicamente los distinguiremos, porque debes saber bien si ese 'prop' sera incluido como uno de los atributos que haremos 'echo' como parte de la etiqueta ancla 'a' o no. Así que si tienes un 'prop' llamado activo y haces 'echo' como parte de los atributos, ahora tienes una etiqueta ancla 'a' con un nombre de atributo 'active' y eso no tiene sentido. Por eso tenemos que distinquir entre estos dos y aquí tenemos como lo haremos:
 
-o, podemos declarar un slot nombrado. Recuerda que los slots son áreas donde pegamos contenido; así que podemos tener slots en diferentes áreas de nuestra página. Por eso, necesitamos nombrarlos, para poder distinguirlos: Dashboard slot, main slot, footer slot, etc.
+En la parte superior de mi componente blade usaré una directiva Blade. Reconoceras una directiva blade porque ellas empiezan con un símbolo '@' y note como nuestro edito autocompleta todas las opciones disponibles aquí y hay infinidad de ellas.
 
-    <x-layout>
-        <x-slot:heading>
-            Home Page
-        </x-slot:heading>
-        <h1>Hello from the Home Page.</h1>
-    </x-layout>
+En nuestro caso, utilizaremos una llamada '@props()', así que podemos declarar nuestros 'props' como un arreglo. y hemos decidido que usaremos uno llamado 'active'. Ok! Dejame mostrarte como funciona!
 
-Y replicamos ese slot named en About and Contact page. Ahora bien podriamos modificar las imágenes del usuario y de la empresa, para lo cual buscariamos las etiquetas de imágenes para editarlas.
+	@props(['active'])
 
-## Homework
+    <a class="{{ request()->is('/') ? 'rounded-md bg-gray-900 px-3 py-2 text-sm font-medium text-white' : 'rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white'}}" aria-current="{{ request()->is('/') ? 'page' : 'false'}}"
+    {{ $attributes }}
+    >{{ $slot }}</a>
 
-Ahora bien, habrás notado que cada vez que haces clic ya sea en 'About' o 'Contact' menu, 'Home' se queda seleccionado. Tendremos que encontrar la manera condicional de crear layouts o aplicar Styling basado en cuál es la URL actual, o cuál es la ruta actual. Aprenderemos a hacer eso en el día 5. Así que no tendremos tarea el día de hoy. Nos vemos luego! Bye!
+Ahora bien, como lo hemos definido como un 'prop' no se podra ver el contenido de ese atritubo con la variable '$attributes'. Por lo tanto, debemos configurar o definir nuestra variable 'active':
+
+	@props(['active' => false])
+
+    <a class="{{ $active ? 'rounded-md bg-gray-900 px-3 py-2 text-sm font-medium text-white' : 'rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white'}}" aria-current="{{ request()->is('/') ? 'active' : 'false'}}"
+{{ $attributes }}
+>{{ $slot }}</a>
+
+Ahora bien, asi como esta, cualquier valor que este en el prop 'active' sera tomado como falso porque se leera como un string.
+
+	<x-nav-link href="/">Home</x-nav-link>
+                                <x-nav-link href="/about" active="foobar">About</x-nav-link>
+                                <x-nav-link href="/contact">Contacts</x-nav-link>
+
+
+Para evitarlo y hacerle saber al compilador que debe leer el contenido como una expresión en lugar de una cadena, debemos anteponer dos puntos antes del nombre del 'prop'
+
+
+	 <x-nav-link href="/">Home</x-nav-link>
+                                <x-nav-link href="/about" :active="false">About</x-nav-link>
+                                <x-nav-link href="/contact">Contacts</x-nav-link>
+
+Bien ahora que ya podemos proveer una expresion, podemos regresar a lo que originalmente tenia. 
+
+    <x-nav-link href="/" :active="request()->is('/')">Home</x-nav-link>
+                                <x-nav-link href="/about" :active="request()->is('about')">About</x-nav-link>
+                                <x-nav-link href="/contact" :active="request()->is('contact')">Contacts</x-nav-link>
+
+
+Excelente! ahora tenemos un componente dedicado blade. Hemos aprendido acerca de los atributos, hemos aprendido acerca de los 'props'. Recuerda que tu puedes hacer cosas como estas, donde puedes declarar una directiva PHP ('@php') y podrias hacer un '@endphp' para crear nuestro bloque efectivamente y entonces adentro de esto podrias tener algun tipo de codigo. podria ser una condicion, inspeccionar el valor de un activo, etc.
+
+## HOMEWORK
+
+Continuemos con este idea del componente. Me gustaria que introdujeras un nuevo 'prop'. Llamaremos a este prop 'type' y  este indicara si el enlace de navegacion deberia ser presentado como una etiqueta ancla 'a' o una etiqueta 'button'
